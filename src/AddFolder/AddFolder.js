@@ -4,7 +4,6 @@ import NotefulForm from '../NotefulForm/NotefulForm'
 import config from '../config'
 import { generateId } from '../notes-helpers'
 
-import './AddFolder.css'
 
 export default class AddFolder extends React.Component {
   state = { 
@@ -44,8 +43,8 @@ export default class AddFolder extends React.Component {
   }
 
   validateFolderName = () => {
-    let name = this.state.folderName.value;
-    if (name.length <= 1) {
+    let name = this.state.folderName.value.trim();
+    if (name.length <= 0) {
       return "Must enter a name"
     }
   }

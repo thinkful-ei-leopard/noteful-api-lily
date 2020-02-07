@@ -4,8 +4,6 @@ import NotefulForm from "../NotefulForm/NotefulForm";
 import config from '../config'
 import { generateId } from '../notes-helpers'
 
-import './AddNote.css'
-
 export default class AddNote extends React.Component {
   state = {
     noteName: { value: "", touched: false },
@@ -29,6 +27,9 @@ export default class AddNote extends React.Component {
 
   handleFormSubmit(event) {
     event.preventDefault();
+    if(this.state.name === '') {
+      alert ('Enter a name')
+    }
     if(this.state.folderId.value.length <= 0) {
       this.setState({
         folderId: {
@@ -101,8 +102,7 @@ export default class AddNote extends React.Component {
         >
           <label htmlFor="note-name">
             Note Name
-            {this.state.noteName.touched && 
-                <p className="error">{this.validateName()}</p>}
+            {this.state.noteName.touched && <p className="error">{this.validateName()}</p>}
           </label>
           <input
             id="note-name"
@@ -113,8 +113,7 @@ export default class AddNote extends React.Component {
           />
           <label htmlFor="folderSelect">
               Folder
-              {this.state.folderId.empty && 
-              <p className="error">{this.validateFolder()}</p>}  
+              {this.state.folderId.empty && <p className="error">{this.validateFolder()}</p>}  
           </label>
           <select onChange={e => this.setFolderId(e.target.value)} id="folderSelect">
             <option value=''>Select A Folder</option>
@@ -122,8 +121,7 @@ export default class AddNote extends React.Component {
           </select>
           <label htmlFor="content">
               Content
-              {this.state.content.touched && 
-              <p className="error">{this.validateContent()}</p>}
+              {this.state.content.touched && <p className="error">{this.validateContent()}</p>}
           </label>
           <textarea onChange={e => this.setContent(e.target.value)} id="content" value={this.state.content.value} placeholder="Enter a description"></textarea>
           <button type="submit" disabled={this.validateName() || this.validateContent()}>Submit Note</button>
