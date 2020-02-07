@@ -13,3 +13,5 @@ export const getNotesForFolder = (notes=[], folderId) => (
 
 export const countNotesForFolder = (notes=[], folderId) =>
   notes.filter(note => note.folderId === folderId).length
+
+export const generateId = () => '_' + Math.random().toString(36).substr(2, 9);
