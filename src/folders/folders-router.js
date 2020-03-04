@@ -8,7 +8,7 @@ const jsonParser = express.json()
 
 const serializeFolder = folder => ({
   id: folder.id,
-  foldername: xss(folder.folder_name)
+  folder_name: xss(folder.folder_name)
 })
 
 foldersRouter
@@ -22,8 +22,8 @@ foldersRouter
       .catch(next)
   })
   .post(jsonParser, (req, res, next) => {
-    const { foldername } = req.body
-    const newFolder = { foldername }
+    const { folder_name } = req.body
+    const newFolder = { folder_name }
 
     for (const [key, value] of Object.entries(newFolder)) {
       if (value == null) {
@@ -78,18 +78,18 @@ foldersRouter
       .catch(next)
   })
   .patch(jsonParser, (req, res, next) => {
-    const { foldername } = req.body
-    const folderToUpdate = { foldername }
+    const { folder_name } = req.body
+    const folderToUpdate = { folder_name }
 
     const numberOfValues = Object.values(folderToUpdate).filter(Boolean).length
     if (numberOfValues === 0)
       return res.status(400).json({
         error: {
-          message: `Request body must contain either 'fullname', 'foldername', 'password' or 'nickname'`
+          message: `Request body must contain 'folder_name'`
         }
       })
 
-    FoldersService.updatefolder(
+    FoldersService.updateFolder(
       req.app.get('db'),
       req.params.folder_id,
       folderToUpdate

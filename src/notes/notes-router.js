@@ -6,29 +6,29 @@ const NotesService = require('./notes-service')
 const notesRouter = express.Router()
 const jsonParser = express.json()
 
-const serializeUser = user => ({
-  id: user.id,
-  note_name: xss(user.fullname),
-  content: xss(user.username),
-  date_modified: xss(user.nickname),
-  date_created: user.date_created,
+const serializeNote = note => ({
+  id: note.id,
+  note_name: xss(note.note_name),
+  content: xss(note.content),
+  date_modified: note.date_modified,
+  folder_id: note.folder_id,
 })
 
 notesRouter
   .route('/')
   .get((req, res, next) => {
     const knexInstance = req.app.get('db')
-    NotesService.getAllnotes(knexInstance)
+    NotesService.getAllNotes(knexInstance)
       .then(notes => {
-        res.json(notes.map(serializeUser))
+        res.json(notes.map(serializeNote))
       })
       .catch(next)
   })
   .post(jsonParser, (req, res, next) => {
-    const { fullname, username, nickname, password } = req.body
-    const newUser = { fullname, username }
+    const { note_name, content, folder_id } = req.body
+    const newNote = { note_name, content }
 
-    for (const [key, value] of Object.entries(newUser)) {
+    for (const [key, value] of Object.entries(newNote)) {
       if (value == null) {
         return res.status(400).json({
           error: { message: `Missing '${key}' in request body` }
@@ -36,47 +36,46 @@ notesRouter
       }
     }
 
-    newUser.nickname = nickname;
-    newUser.password = password;
-
-    NotesService.insertUser(
+    newNote.folder_id = folder_id
+    
+    NotesService.insertNote(
       req.app.get('db'),
-      newUser
+      newNote
     )
-      .then(user => {
+      .then(note => {
         res
           .status(201)
-          .location(path.posix.join(req.originalUrl, `/${user.id}`))
-          .json(serializeUser(user))
+          .location(path.posix.join(req.originalUrl, `/${note.id}`))
+          .json(serializeNote(note))
       })
       .catch(next)
   })
 
 notesRouter
-  .route('/:user_id')
+  .route('/:note_id')
   .all((req, res, next) => {
     NotesService.getById(
       req.app.get('db'),
-      req.params.user_id
+      req.params.note_id
     )
-      .then(user => {
-        if (!user) {
+      .then(note => {
+        if (!note) {
           return res.status(404).json({
-            error: { message: `User doesn't exist` }
+            error: { message: `note doesn't exist` }
           })
         }
-        res.user = user
+        res.note = note
         next()
       })
       .catch(next)
   })
   .get((req, res, next) => {
-    res.json(serializeUser(res.user))
+    res.json(serializeNote(res.note))
   })
   .delete((req, res, next) => {
-    NotesService.deleteUser(
+    NotesService.deleteNote(
       req.app.get('db'),
-      req.params.user_id
+      req.params.note_id
     )
       .then(numRowsAffected => {
         res.status(204).end()
@@ -84,21 +83,21 @@ notesRouter
       .catch(next)
   })
   .patch(jsonParser, (req, res, next) => {
-    const { fullname, username, password, nickname } = req.body
-    const userToUpdate = { fullname, username, password, nickname }
+    const { note_name, content, folder_id } = req.body
+    const noteToUpdate = { note_name, content, folder_id }
 
-    const numberOfValues = Object.values(userToUpdate).filter(Boolean).length
+    const numberOfValues = Object.values(noteToUpdate).filter(Boolean).length
     if (numberOfValues === 0)
       return res.status(400).json({
         error: {
-          message: `Request body must contain either 'fullname', 'username', 'password' or 'nickname'`
+          message: `Request body must contain either 'note_name', 'content', or 'folder_id'`
         }
       })
 
-    NotesService.updateUser(
+    NotesService.updateNote(
       req.app.get('db'),
-      req.params.user_id,
-      userToUpdate
+      req.params.note_id,
+      noteToUpdate
     )
       .then(numRowsAffected => {
         res.status(204).end()
