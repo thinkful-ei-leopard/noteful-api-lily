@@ -4,7 +4,7 @@ const app = require('../src/app')
 const { makeNotesArray, makeMaliciousNote } = require('./notes.fixtures')
 const { makeFoldersArray } = require('./folders.fixtures')
 
-describe('Notes Endpoints', function() {
+describe.only('Notes Endpoints', function() {
   let db
 
   before('make knex instance', () => {
@@ -154,7 +154,7 @@ describe('Notes Endpoints', function() {
       const newNote = {
         note_name: 'test new note',
         content: 'test new note content',
-        folder_id: 3
+        folder_id: 2
       }
       return supertest(app)
         .post('/api/notes')
@@ -177,13 +177,13 @@ describe('Notes Endpoints', function() {
         )
     })
 
-    const requiredFields = ['note_name', 'content', 'folder_id']
+    const requiredFields = ['note_name', 'content']
 
     requiredFields.forEach(field => {
       const newNote = {
         note_name: 'Test new note',
         content: 'test note content',
-        folder_id: 1
+        folder_id: 2
       }
 
       it(`responds with 400 and an error message when the '${field}' is missing`, () => {
@@ -211,128 +211,128 @@ describe('Notes Endpoints', function() {
     })
   })
 
-  // describe(`DELETE /api/articles/:article_id`, () => {
-  //   context(`Given no articles`, () => {
-  //     it(`responds with 404`, () => {
-  //       const articleId = 123456
-  //       return supertest(app)
-  //         .delete(`/api/articles/${articleId}`)
-  //         .expect(404, { error: { message: `Article doesn't exist` } })
-  //     })
-  //   })
+  describe(`DELETE /api/notes/:notes_id`, () => {
+    context(`Given no notes`, () => {
+      it(`responds with 404`, () => {
+        const notesId = 123456
+        return supertest(app)
+          .delete(`/api/notes/${notesId}`)
+          .expect(404, { error: { message: `note doesn't exist` } })
+      })
+    })
 
-  //   context('Given there are articles in the database', () => {
-  //     const testUsers = makeUsersArray();
-  //     const testArticles = makeArticlesArray()
+    context('Given there are notes in the database', () => {
+      const testNotes = makeNotesArray()
+      const testFolders = makeFoldersArray()
 
-  //     beforeEach('insert articles', () => {
-  //       return db
-  //         .into('blogful_users')
-  //         .insert(testUsers)
-  //         .then(() => {
-  //           return db
-  //             .into('blogful_articles')
-  //             .insert(testArticles)
-  //         })
-  //     })
+      beforeEach('insert notes', () => {
+        return db
+          .into('noteful_folders')
+          .insert(testFolders)
+          .then(() => {
+            return db
+              .into('noteful_notes')
+              .insert(testNotes)
+          })
+      })
 
-  //     it('responds with 204 and removes the article', () => {
-  //       const idToRemove = 2
-  //       const expectedArticles = testArticles.filter(article => article.id !== idToRemove)
-  //       return supertest(app)
-  //         .delete(`/api/articles/${idToRemove}`)
-  //         .expect(204)
-  //         .then(res =>
-  //           supertest(app)
-  //             .get(`/api/articles`)
-  //             .expect(expectedArticles)
-  //         )
-  //     })
-  //   })
-  // })
+      it('responds with 204 and removes the note', () => {
+        const idToRemove = 2
+        const expectedNotes = testNotes.filter(note => note.id !== idToRemove)
+        return supertest(app)
+          .delete(`/api/notes/${idToRemove}`)
+          .expect(204)
+          .then(res =>
+            supertest(app)
+              .get(`/api/notes`)
+              .expect(expectedNotes)
+          )
+      })
+    })
+  })
 
-  // describe(`PATCH /api/articles/:article_id`, () => {
-  //   context(`Given no articles`, () => {
-  //     it(`responds with 404`, () => {
-  //       const articleId = 123456
-  //       return supertest(app)
-  //         .delete(`/api/articles/${articleId}`)
-  //         .expect(404, { error: { message: `Article doesn't exist` } })
-  //     })
-  //   })
+  describe(`PATCH /api/notes/:note_id`, () => {
+    context(`Given no notes`, () => {
+      it(`responds with 404`, () => {
+        const noteId = 123456
+        return supertest(app)
+          .delete(`/api/notes/${noteId}`)
+          .expect(404, { error: { message: `note doesn't exist` } })
+      })
+    })
 
-  //   context('Given there are articles in the database', () => {
-  //     const testUsers = makeUsersArray();
-  //     const testArticles = makeArticlesArray()
+    context('Given there are notes in the database', () => {
+      const testNotes = makeNotesArray()
+      const testFolders = makeFoldersArray()
 
-  //     beforeEach('insert articles', () => {
-  //       return db
-  //         .into('blogful_users')
-  //         .insert(testUsers)
-  //         .then(() => {
-  //           return db
-  //             .into('blogful_articles')
-  //             .insert(testArticles)
-  //         })
-  //     })
+      beforeEach('insert notes', () => {
+        return db
+          .into('noteful_folders')
+          .insert(testFolders)
+          .then(() => {
+            return db
+              .into('noteful_notes')
+              .insert(testNotes)
+          })
+      })
 
-  //     it('responds with 204 and updates the article', () => {
-  //       const idToUpdate = 2
-  //       const updateArticle = {
-  //         title: 'updated article title',
-  //         style: 'Interview',
-  //         content: 'updated article content',
-  //       }
-  //       const expectedArticle = {
-  //         ...testArticles[idToUpdate - 1],
-  //         ...updateArticle
-  //       }
-  //       return supertest(app)
-  //         .patch(`/api/articles/${idToUpdate}`)
-  //         .send(updateArticle)
-  //         .expect(204)
-  //         .then(res =>
-  //           supertest(app)
-  //             .get(`/api/articles/${idToUpdate}`)
-  //             .expect(expectedArticle)
-  //         )
-  //     })
+      it('responds with 204 and updates the note', () => {
+        const idToUpdate = 2
+        const updateNote = {
+          note_name: 'updated note name',
+          content: 'updated note content',
+          folder_id: 1
+        }
+        const expectedNote = {
+          ...testNotes[idToUpdate - 1],
+          ...updateNote
+        }
+        return supertest(app)
+          .patch(`/api/notes/${idToUpdate}`)
+          .send(updateNote)
+          .expect(204)
+          .then(res =>
+            supertest(app)
+              .get(`/api/notes/${idToUpdate}`)
+              .expect(expectedNote)
+          )
+      })
 
-  //     it(`responds with 400 when no required fields supplied`, () => {
-  //       const idToUpdate = 2
-  //       return supertest(app)
-  //         .patch(`/api/articles/${idToUpdate}`)
-  //         .send({ irrelevantField: 'foo' })
-  //         .expect(400, {
-  //           error: {
-  //             message: `Request body must contain either 'title', 'style' or 'content'`
-  //           }
-  //         })
-  //     })
+      it(`responds with 400 when no required fields supplied`, () => {
+        const idToUpdate = 2
+        return supertest(app)
+          .patch(`/api/notes/${idToUpdate}`)
+          .send({ irrelevantField: 'foo' })
+          .expect(400, { 
+            error: { 
+            message: `Request body must contain either 'note_name', 'content', or 'folder_id'`
+            }
+          })
+      })
 
-  //     it(`responds with 204 when updating only a subset of fields`, () => {
-  //       const idToUpdate = 2
-  //       const updateArticle = {
-  //         title: 'updated article title',
-  //       }
-  //       const expectedArticle = {
-  //         ...testArticles[idToUpdate - 1],
-  //         ...updateArticle
-  //       }
+      it(`responds with 204 when updating only a subset of fields`, () => {
+        const idToUpdate = 2
+        const updateNote = {
+          note_name: 'updated note name',
+        }
+        const expectedNote = {
+          ...testNotes[idToUpdate - 1],
+          ...updateNote
+        }
 
-  //       return supertest(app)
-  //         .patch(`/api/articles/${idToUpdate}`)
-  //         .send({
-  //           ...updateArticle,
-  //           fieldToIgnore: 'should not be in GET response'
-  //         })
-  //         .expect(204)
-  //         .then(res =>
-  //           supertest(app)
-  //             .get(`/api/articles/${idToUpdate}`)
-  //             .expect(expectedArticle)
-  //         )
-  //     })
-  //   })
-  // })
+        return supertest(app)
+          .patch(`/api/notes/${idToUpdate}`)
+          .send({
+            ...updateNote,
+            fieldToIgnore: 'should not be in GET response'
+          })
+          .expect(204)
+          .then(res =>
+            supertest(app)
+              .get(`/api/notes/${idToUpdate}`)
+              .expect(expectedNote)
+          )
+      })
+    })
+  })
 })
